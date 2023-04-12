@@ -51,5 +51,5 @@ nn_tictoc <- tibble(model = time_log[[1]]$msg,
                           runtime = time_log[[1]]$toc - time_log[[1]]$tic)
 
 
-save(nn_tune, nn_tictoc, 
+save(nn_tune, nn_tictoc, nn_workflow,
      file = "results/nn_tuned.rda" )

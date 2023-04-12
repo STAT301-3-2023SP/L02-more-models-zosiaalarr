@@ -13,13 +13,13 @@ load("results/tuning_setup.rda")
 registerDoMC(cores = 8)
 #########################
 # define model engine 
-bt_model <- boost_tree(mode = "regression",
+bt_model <- boost_tree(mode = "classification",
                        min_n = tune(),
                        mtry = tune(),
                        learn_rate = tune()) %>%
   set_engine("xgboost", importance = "impurity")
 
-learn_rate()
+
 bt_params <- extract_parameter_set_dials(bt_model) %>% 
   update(mtry = mtry(range = c(1, 15)))
 

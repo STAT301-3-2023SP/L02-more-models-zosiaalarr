@@ -36,9 +36,9 @@ knn_tune <- tune_grid(
   knn_workflow,
   resamples = wildfire_folds,
   grid = knn_grid,
-  control = control_grid(save_pred = TRUE,
-                         save_workflow = TRUE,
-                         parallel_over = "everything") # this helps with parrallel processing
+  control = control_grid(save_pred = TRUE, # creates extra column for each prediction 
+                         save_workflow = TRUE, # lets you use extract_workflow 
+                         parallel_over = "everything") # this helps with parallel processing
 )
 
 toc(log = TRUE)

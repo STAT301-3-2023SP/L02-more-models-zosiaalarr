@@ -4,6 +4,7 @@ library(tidymodels)
 library(tidyverse)
 library(tictoc)
 library(doMC)
+library(earth)
 tidymodels_prefer()
 
 load("results/tuning_setup.rda")
@@ -22,7 +23,7 @@ mars_model <- mars(
   set_engine("earth")
 
 mars_params <- extract_parameter_set_dials(mars_model) %>% 
-  update(num_terms = num_terms(range = c(1, 23)))
+  update(num_terms = num_terms(range = c(1, 13)))
 
 mars_grid <- grid_regular(mars_params, levels = 5) 
 

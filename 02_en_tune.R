@@ -56,7 +56,7 @@ time_log <- tic.log(format = FALSE)
 
 en_tictoc <- tibble(model = time_log[[1]]$msg,
                     runtime = time_log[[1]]$toc - time_log[[1]]$tic)
-
+en_tictoc
 
 save(en_tune, en_tictoc, 
      file = "results/en_tuned.rda" )

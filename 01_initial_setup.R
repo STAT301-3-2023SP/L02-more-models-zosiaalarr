@@ -48,7 +48,7 @@ wildfire_folds <- vfold_cv(wildfire_train, v = 5, repeats = 3,
 wildfire_recipe <- recipe(wlf ~ ., data = wildfire_train) %>% 
   step_novel(all_nominal_predictors()) %>% # if a factor level was not seen in training set, it will be added at testing-- error catching method 
   step_dummy(all_nominal_predictors()) %>% 
-  step_zv(all_predictors()) %>% 
+  step_zv(all_predictors()) %>% # always put before step_normalize 
   step_normalize(all_predictors()) 
   
   
