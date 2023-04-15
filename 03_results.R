@@ -91,75 +91,66 @@ model_set %>%
   theme(legend.position = "none")
 # save as image for the report 
 
+
+
 ## table of our results 
 model_results <- model_set %>% 
-  group_by(wflow_id) %>% 
-  mutate(best = map(result, show_best, metric = "roc_auc", n = 1)) %>% 
+  group_by(wflow_id) %>% # because need best model for every workflow id
+  mutate(best = map(result, show_best, metric = "roc_auc", n = 1)) %>% # create new column, use show_best to show roc_auc results
   select(best) %>% 
-  unnest(cols = c(best)) %>% 
-  slice_max(mean)
+  unnest(cols = c(best)) #%>% 
+#slice_max(mean) # name of variable we want the maximum of 
 
 ## computation time 
-model_times <- bind_rows(en_tictoc,
+model_times <- bind_rows(en_tictoc, 
                          bt_tictoc,
                          rf_tictoc,
                          knn_tictoc,
-                         nn_tictoc, 
+                         nn_tictoc,
                          svm_poly_tictoc,
                          svm_radial_tictoc,
-                         mars_tictoc)
+                         mars_tictoc) %>% 
+  mutate(wflow_id = c(  "elastic_net",
+                        "boosted_tree",
+                        "random_forest", 
+                        "knn", 
+                        "nn", 
+                        "svm_poly",
+                        "svm_radial",
+                        "mars"))
+
+
+result_table <- merge(model_results, model_times) %>% 
+  select(model, mean, runtime) %>% 
+  rename(roc_auc = mean)
+
+save(result_table,file =  "results/result_table.rda")
 
 
 ##########################################################################
 # fit the best model to training set and predict testing set 
 
-# Elastic Net 
-best_en <- en_tune %>% 
-  show_best(metric = "roc_auc") %>% 
-  slice_head()
+# finalize the workflow
 
-# Random Forest 
-best_rf <- rf_tune %>% 
-  show_best() %>% 
-  slice_head()
-best_rf
+nn_workflow <- nn_workflow %>% 
+  finalize_workflow(select_best(nn_tune, metric = "roc_auc"))
 
-best_rf <- show_best(rf_tune, metric = "rmse")[1,]
+# fit training data to final workflow 
 
-# KNN 
-best_knn <- knn_tune %>% 
-  show_best() %>% 
-  slice_head()
-best_knn
+final_fit <- fit(nn_workflow, wildfire_train)
 
-# Boosted Tree 
-best_bt <- bt_tune %>% 
-  show_best() %>% 
-  slice_head()
-best_bt
+# predict the testing data 
+final_pred <- predict(final_fit, wildfire_test) %>% 
+  bind_cols(wildfire_test %>% select(wlf))
 
-# Neural Network 
-best_nn <- nn_tune %>% 
-  show_best() %>% 
-  slice_head()
-best_nn
 
-# SVM Poly 
-best_svm_poly <- svm_poly_tune %>% 
-  show_best() %>% 
-  slice_head()
-best_svm_poly
+# final roc_auc 
 
-# SVM Radial 
-best_svm_radial <- svm_radial_tune %>% 
-  show_best() %>% 
-  slice_head()
-best_svm_radial
+metric <- metric_set(roc_auc)
 
-# MARS 
-best_mars <- mars_tune %>% 
-  show_best() %>% 
-  slice_head()
-best_mars
+final_pred %>% 
+  metric(truth = wlf, estimate = .pred)
+
+# confusion plot of results 
 
 

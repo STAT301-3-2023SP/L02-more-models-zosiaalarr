@@ -27,74 +27,33 @@ To link to your github **repo**sitory, appropriately edit the example link below
 :::
 
 
-## Overview
+# Executive Summary 
 
-The main goals of this lab are (1) review and practice the application of machine learning within the `tidymodels` framework and (2) introduce and explore a few new model types.
+The goal of this project is to predict whether or not a wild fire will reach the wildlife protection zone of a given national forest. The data set includes 500 different wildfires in a national park in North America. The outcome variable of interest is a dummy encoded factor variable with outcomes being either, 1 the wildfire reached the wildlife protection zone, or 0 it did not. 
+ 
+We predicted whether or not a wildfire will reach the wildlife protection zone based on 8 different models. We used all 14 variables for each prediction. We reserved 25% of our data for testing data, the remaining we used for cross validation with 5 folds and 3 repeats. We tuned for the hyperparameters in each model and used the resample data to train the models and collect their best parameter values. We used the Area under the ROC curve as our performance metric to evalute each model.The resulting model performances are shown in the table and graph bellow. 
 
-## Dataset
+```{r, echo=FALSE}
+# table here 
+load("results/result_table.rda")
 
-We will be utilizing `wildfires.csv` dataset contained in the **data** subdirectory. `wildfires_codebook.html` provides a quick overview of the data which is where students should begin.
+result_table
 
+```
+![](graph_1.png)
 
+The table above shows that the Neural Network model has the highest ROC value, meaning it performed the best. The Neural Network model had the best performance when its `hidden_units` value was 10 and its penalty was `1`. When used with the testing data, the Neural Network had an ROC value of .855, slightly lower than its value in the training set. A confusion matrix can be observed bellow that shows the number of false positives, false negatives, true negatives, and true positives. This matrix shows that the model is mostly accurate but does have a fair amount of false positives and negatives.  
 
-## Instructions
+```{r, echo=FALSE}
 
-A wildlife protection area is located in the park from which this data was collected and we want to predict whether or not a wildfire will reach it (`wlf`) given all the other variables in our dataset except for `burned` (we will be using it as a target variable in the future).
+load("results/roc_auc.rda")
+roc_auc
 
-Using the `tidymodels` framework, pick the best model from the following candidate models:
+load("results/conf_matrix.rda")
+conf_matrix
+```
 
-1.  elastic net
-
-    -   tune `mixture` and `penalty`
-    -   include all two-way interactions
-
-2.  Nearest neighbors
-
-    -   tune number of `neighbors`
-
-3.  Random forest
-
-    -   tune `mtry` and `min_n`
-
-4.  Boosted tree
-
-    -   tune `mtry`, `min_n`, and `learn_rate`
-
-5.  Support vector machine (polynomial)
-
-    -   tune `cost`, `degree`, and `scale_factor` (default values are sufficient, free to change if you want)
-
-6.  Support vector machine (radial basis function)
-
-    -   tune `cost` and `rbf_sigma` (default values a sufficient, free to change if you want)
-
-7.  Single Layer Neural Network (multilayer perceptron --- mlp)
-
-    -   tune `hidden_units` and `penalty` (default values a sufficient, free to change if you want)
-    -   `nnet` for the engine will be easiest, Alternatively, you might want to try `keras` if you can get it installed ([Keras Installation](https://tensorflow.rstudio.com/guide/keras/)).
-    
-8. Multivariate adaptive regression splines (MARS)
-
-    - tune `num_terms` (need to supply upperbound) and `prod_degree` (defualt works here)
-
-Some general notes:
-
-- For tuning we suggest using 5 folds and 3 repeats. 
-- Make sure you specify which performance measure you are using to pick the best model.
-- Almost all work should be done in R scripts and you will only be reporting the results (we will see the R scripts in your repo).
-- Suggest using jobs.
-- A basic layout is suggested/provided. 
-- We also want to collect how long it takes the tuning process for each model type. We can use the `tictoc` package --- code is provided in the `template_tune.R`.
-
-## What should be turned in
-
-A short write-up that includes:
-
-1. A nicely formatted table that lists the 8 general types of model and the best performance it achieved. 
-
-2. A nicely formatted table that lists the run time for the tuning process for the 8 model types (could be combined with first table).
-
-3. Final selection, training, and evaluation of the best model. 
+Using a Neural Network we can predict whether or not a wildfire will reach a wildlife protection zone with fair accuracy. Future studies could further investigate different types of models to see if their test performance is better than the Neural Network model used in this analysis. 
 
 
 
