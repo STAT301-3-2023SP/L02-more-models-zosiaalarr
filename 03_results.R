@@ -82,13 +82,15 @@ knn_tune %>%
 model_set %>% 
   autoplot(metric = "roc_auc")
 
-model_set %>% 
+graph_1 <- model_set %>% 
   autoplot(metric = "roc_auc", select_best = TRUE) +
   theme_minimal() +
   geom_text(aes(y = mean - 0.03, label = wflow_id), angle = 90, hjust = 1) +
   ggtitle(label = "Best Results") +
   ylim(c(0.7, 0.9)) + 
-  theme(legend.position = "none")
+  theme(legend.position = "none") 
+
+ggsave("graph_1.png")
 # save as image for the report 
 
 
@@ -99,6 +101,7 @@ model_results <- model_set %>%
   mutate(best = map(result, show_best, metric = "roc_auc", n = 1)) %>% # create new column, use show_best to show roc_auc results
   select(best) %>% 
   unnest(cols = c(best)) #%>% 
+
 #slice_max(mean) # name of variable we want the maximum of 
 
 ## computation time 
@@ -140,17 +143,36 @@ nn_workflow <- nn_workflow %>%
 final_fit <- fit(nn_workflow, wildfire_train)
 
 # predict the testing data 
-final_pred <- predict(final_fit, wildfire_test) %>% 
+
+wildfires_pred_class <- predict(final_fit, wildfire_test) %>% 
   bind_cols(wildfire_test %>% select(wlf))
 
+wildfires_pred <- wildfire_test %>%
+  bind_cols(predict(final_fit, new_data = wildfire_test, type = "prob"))  %>%
+  select(wlf, .pred_yes, .pred_no)
 
-# final roc_auc 
 
-metric <- metric_set(roc_auc)
+roc_auc <- yardstick::roc_auc(wildfires_pred, truth = wlf, .pred_yes)
 
-final_pred %>% 
-  metric(truth = wlf, estimate = .pred)
+roc_auc
+
+
+save(roc_auc,file =  "results/roc_auc.rda")
+
+# best tuning parameters 
+params <- nn_tune %>% 
+  show_best() %>% 
+  head(n = 1)
+
+save(params,file =  "results/params.rda")
+
 
 # confusion plot of results 
+
+conf_matrix <- conf_mat(wildfires_pred_class, wlf, .pred_class)
+
+conf_matrix
+
+save(conf_matrix,file =  "results/conf_matrix.rda")
 
 
