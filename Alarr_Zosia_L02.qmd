@@ -35,22 +35,48 @@ We predicted whether or not a wildfire will reach the wildlife protection zone b
 ```{r, echo=FALSE}
 # table here 
 load("results/result_table.rda")
+library(kableExtra)
 
-result_table
+
+
+result_table %>% 
+  kbl(caption = "Results Table") %>% 
+  kable_classic() %>% 
+  save_kable("result_table.png", zoom = 10)
+
 
 ```
 ![](graph_1.png)
+
+
+![](result_table.png)
 
 The table above shows that the Neural Network model has the highest ROC value, meaning it performed the best. The Neural Network model had the best performance when its `hidden_units` value was 10 and its penalty was `1`. When used with the testing data, the Neural Network had an ROC value of .855, slightly lower than its value in the training set. A confusion matrix can be observed bellow that shows the number of false positives, false negatives, true negatives, and true positives. This matrix shows that the model is mostly accurate but does have a fair amount of false positives and negatives.  
 
 ```{r, echo=FALSE}
 
 load("results/roc_auc.rda")
-roc_auc
-
 load("results/conf_matrix.rda")
-conf_matrix
+
+
+library(yardstick)
+library(ggplot2)
+
+
+roc_auc %>% 
+  kbl(caption = "ROC AUC: Neural Network Model ") %>% 
+  kable_classic() %>% 
+  save_kable("roc_auc.png", zoom = 10)
+
+
+autoplot(conf_matrix, type = "heatmap") +
+  scale_fill_gradient(low="#D6EAF8",high = "#2E86C1")
+
+
+
 ```
+
+![](roc_auc.png)
 
 Using a Neural Network we can predict whether or not a wildfire will reach a wildlife protection zone with fair accuracy. Future studies could further investigate different types of models to see if their test performance is better than the Neural Network model used in this analysis. 
 
